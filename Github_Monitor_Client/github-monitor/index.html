@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Github Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              background: 'var(--color-background)',
+              surface: 'var(--color-surface)',
+              border: 'var(--color-border)',
+              primary: 'var(--color-primary)',
+              txt: {
+                main: 'var(--color-text-main)',
+                sec: 'var(--color-text-secondary)'
+              },
+              success: '#238636',
+              danger: '#da3633',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        /* Light Mode Variables */
+        --color-background: #f6f8fa;
+        --color-surface: #ffffff;
+        --color-border: #d0d7de;
+        --color-text-main: #24292f;
+        --color-text-secondary: #57606a;
+        --color-primary: #0969da;
+      }
+
+      .dark {
+        /* Dark Mode Variables - Modern Deep Dark Theme */
+        --color-background: #000000;
+        --color-surface: #09090b; /* Zinc 950 */
+        --color-border: #27272a; /* Zinc 800 */
+        --color-text-main: #ededed;
+        --color-text-secondary: #a1a1aa; /* Zinc 400 */
+        --color-primary: #3b82f6; /* Blue 500 */
+      }
+
+      body {
+        background-color: var(--color-background);
+        color: var(--color-text-main);
+        transition: background-color 0.3s, color 0.3s;
+      }
+      
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--color-background); 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--color-border); 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--color-text-secondary); 
+      }
+
+      /* GitHub Logo Animation */
+      @-webkit-keyframes animate-svg-stroke-1 {
+        0% {
+          stroke-dashoffset: 64.95655059814453px;
+          stroke-dasharray: 64.95655059814453px;
+        }
+        100% {
+          stroke-dashoffset: 0;
+          stroke-dasharray: 64.95655059814453px;
+        }
+      }
+
+      @keyframes animate-svg-stroke-1 {
+        0% {
+          stroke-dashoffset: 64.95655059814453px;
+          stroke-dasharray: 64.95655059814453px;
+        }
+        100% {
+          stroke-dashoffset: 0;
+          stroke-dasharray: 64.95655059814453px;
+        }
+      }
+
+      .svg-elem-1 {
+        -webkit-animation: animate-svg-stroke-1 2s cubic-bezier(0.47, 0, 0.745, 0.715) 0s infinite alternate;
+        animation: animate-svg-stroke-1 2s cubic-bezier(0.47, 0, 0.745, 0.715) 0s infinite alternate;
+      }
+
+      @-webkit-keyframes animate-svg-stroke-2 {
+        0% {
+          stroke-dashoffset: 9.893642902374268px;
+          stroke-dasharray: 9.893642902374268px;
+        }
+        100% {
+          stroke-dashoffset: 0;
+          stroke-dasharray: 9.893642902374268px;
+        }
+      }
+
+      @keyframes animate-svg-stroke-2 {
+        0% {
+          stroke-dashoffset: 9.893642902374268px;
+          stroke-dasharray: 9.893642902374268px;
+        }
+        100% {
+          stroke-dashoffset: 0;
+          stroke-dasharray: 9.893642902374268px;
+        }
+      }
+
+      .svg-elem-2 {
+        -webkit-animation: animate-svg-stroke-2 2s cubic-bezier(0.47, 0, 0.745, 0.715) 0.12s infinite alternate;
+        animation: animate-svg-stroke-2 2s cubic-bezier(0.47, 0, 0.745, 0.715) 0.12s infinite alternate;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.13.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

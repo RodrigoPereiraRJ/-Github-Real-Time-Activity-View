@@ -1,0 +1,962 @@
+openapi: 3.0.3
+info:
+  title: GitHub Monitor API
+  description: |
+    API para monitoramento de repositórios GitHub, registro de eventos e sistema de alertas.
+    
+    Baseado no projeto GitHub Monitor API.
+    
+    **Funcionalidades Principais:**
+    * Cadastro e gerenciamento de repositórios.
+    * Recepção de Webhooks do GitHub (Push, PR, Issues, Releases).
+    * Consulta de histórico de eventos.
+    * Métricas de repositórios.
+    * Gerenciamento de regras de alerta e consulta de incidentes.
+    * Autenticação e registro de usuários.
+  version: 1.0.0
+  contact:
+    name: Rodrigo Pereira de Souza
+    email: rodrigo@example.com
+servers:
+  - url: http://localhost:8080
+    description: Servidor de Desenvolvimento Local
+
+tags:
+  - name: Repositories
+    description: Gerenciamento de repositórios monitorados
+  - name: Webhooks
+    description: Endpoint para recebimento de eventos do GitHub
+  - name: Events
+    description: Consulta de histórico de atividades
+  - name: Metrics
+    description: Métricas agregadas e estatísticas
+  - name: Alerts
+    description: Gerenciamento de regras e histórico de alertas
+  - name: Auth
+    description: Autenticação e registro de usuários
+  - name: Users
+    description: Gerenciamento de usuários (ADMIN-only)
+  - name: Contributors
+    description: Listagem de contribuidores
+  - name: Dashboard
+    description: Endpoints relacionados ao dashboard e exportações
+
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Registrar novo usuário
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterInput'
+      responses:
+        '201':
+          description: Usuário registrado com sucesso
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "User registered successfully"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Autenticar usuário
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+      responses:
+        '200':
+          description: Autenticação realizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/users/me:
+    get:
+      tags:
+        - Users
+      summary: Obter dados do usuário atual
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dados do usuário retornados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      tags:
+        - Users
+      summary: Atualizar dados do usuário atual
+      operationId: updateCurrentUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Dados atualizados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /api/users:
+    get:
+      tags:
+        - Users
+      summary: Listar todos os usuários (ADMIN)
+      operationId: listUsers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de usuários retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '403':
+          description: Acesso negado (Requer permissão de ADMIN)
+
+  /api/users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Obter usuário por ID (ADMIN)
+      operationId: getUserById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dados do usuário retornados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '403':
+          description: Acesso negado (Requer permissão de ADMIN)
+
+    delete:
+      tags:
+        - Users
+      summary: Excluir usuário por ID (ADMIN)
+      operationId: deleteUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Usuário excluído com sucesso
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '403':
+          description: Acesso negado (Requer permissão de ADMIN)
+
+  /api/contributors:
+    get:
+      tags:
+        - Contributors
+      summary: Listar todos os contribuidores
+      operationId: listContributors
+      responses:
+        '200':
+          description: Lista de contribuidores retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contributor'
+
+  /api/repositories:
+    get:
+      tags:
+        - Repositories
+      summary: Listar repositórios cadastrados
+      operationId: listRepositories
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Número da página (paginação)
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+          description: Itens por página
+      responses:
+        '200':
+          description: Lista de repositórios retornada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMetadata'
+                  - type: object
+                    properties:
+                      content:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Repository'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Repositories
+      summary: Cadastrar novo repositório para monitoramento
+      operationId: createRepository
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepositoryInput'
+      responses:
+        '201':
+          description: Repositório cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repository'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/repositories/{id}:
+    delete:
+      tags:
+        - Repositories
+      summary: Remover um repositório
+      operationId: deleteRepository
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Repositório removido com sucesso
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/webhooks/github:
+    post:
+      tags:
+        - Webhooks
+      summary: Endpoint para receber Webhooks do GitHub
+      description: |
+        Endpoint público para recebimento de Webhooks do GitHub.
+        Todas as requisições devem conter o header:
+        X-Hub-Signature-256 para validação da assinatura.
+      security: [] 
+      operationId: handleGithubWebhook
+      parameters:
+        - name: X-GitHub-Event
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Tipo do evento (ex: push, pull_request)"
+        - name: X-Hub-Signature-256
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Assinatura HMAC SHA-256 do payload
+        - name: X-GitHub-Delivery
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID único de entrega do evento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Payload dinâmico do GitHub
+      responses:
+        '200':
+          description: Evento processado com sucesso
+        '202':
+          description: Evento aceito para processamento assíncrono
+        '400':
+          description: Assinatura inválida ou payload malformado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Assinatura HMAC ausente ou incorreta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /api/events:
+    get:
+      tags:
+        - Events
+      summary: Consultar histórico de eventos
+      operationId: listEvents
+      parameters:
+        - name: repositoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por ID do repositório
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [PUSH, PULL_REQUEST, ISSUE, RELEASE, CREATE]
+          description: Filtrar por tipo de evento
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Data inicial (ISO 8601)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Data final (ISO 8601)
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Histórico de eventos retornado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMetadata'
+                  - type: object
+                    properties:
+                      content:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Event'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/events/{id}/diff:
+    get:
+      tags:
+        - Events
+      summary: Obter diff de alterações de um evento
+      description: |
+        Retorna a lista de arquivos alterados e seus respectivos diffs (patches).
+        Suporta eventos do tipo PUSH (commits) e PULL_REQUEST.
+      operationId: getEventDiff
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do evento
+      responses:
+        '200':
+          description: Diff retornado com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DiffFile'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/repositories/{id}/metrics:
+    get:
+      tags:
+        - Metrics
+      summary: Obter métricas de um repositório
+      operationId: getRepositoryMetrics
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+            default: 7d
+          description: Período de análise
+      responses:
+        '200':
+          description: Métricas calculadas com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepositoryMetrics'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/alert-rules:
+    get:
+      tags:
+        - Alerts
+      summary: Listar regras de alerta configuradas
+      operationId: listAlertRules
+      responses:
+        '200':
+          description: Lista de regras
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertRule'
+
+  /api/alerts:
+    get:
+      tags:
+        - Alerts
+      summary: Consultar histórico de alertas disparados
+      operationId: listAlerts
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [OPEN, RESOLVED]
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [INFO, WARNING, CRITICAL]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Histórico de alertas
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageMetadata'
+                  - type: object
+                    properties:
+                      content:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Alert'
+
+  /api/alerts/{id}/resolve:
+    post:
+      tags:
+        - Alerts
+      summary: Resolver um alerta
+      operationId: resolveAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Alerta resolvido com sucesso
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/audit-logs:
+    get:
+      tags:
+        - Audit Logs
+      summary: Listar logs de auditoria
+      operationId: listAuditLogs
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de logs de auditoria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+        '403':
+          description: Acesso negado (Requer permissão de ADMIN)
+
+  /api/dashboard/export:
+    get:
+      tags:
+        - Dashboard
+      summary: Gerar e baixar relatório Excel
+      description: Gerar relatório Excel com visão geral, repositórios, eventos recentes e alertas.
+      operationId: exportDashboard
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Relatório Excel gerado com sucesso
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: Nome do arquivo de download
+              schema:
+                type: string
+                example: attachment; filename=github_monitor_dashboard_20240601_120000.xlsx
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Falha ao gerar relatório Excel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Unauthorized:
+      description: Token de acesso ausente ou inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    BadRequest:
+      description: Requisição inválida ou dados malformados
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+  schemas:
+    ApiError:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-01-24T12:00:00Z"
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          example: "Campo repositoryId é obrigatório"
+        path:
+          type: string
+          example: "/api/v1/repositories"
+
+    Contributor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        login:
+          type: string
+        avatarUrl:
+          type: string
+
+    PageMetadata:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          description: Total de itens encontrados
+        totalPages:
+          type: integer
+          description: Total de páginas
+        page:
+          type: integer
+          description: Página atual
+        size:
+          type: integer
+          description: Itens por página
+
+    Repository:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "github-monitor-api"
+        owner:
+          type: string
+          example: "rodrigo3301"
+        url:
+          type: string
+          example: "https://github.com/rodrigo3301/github-monitor-api"
+        lastSyncedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [synced, failed, syncing, paused, pending]
+          description: Status de sincronização do repositório
+        language:
+          type: string
+          example: "Java"
+          description: Linguagem principal do repositório
+        createdAt:
+          type: string
+          format: date-time
+
+    RepositoryInput:
+      type: object
+      required:
+        - owner
+        - name
+      properties:
+        owner:
+          type: string
+          description: Dono do repositório (usuário ou organização)
+        name:
+          type: string
+          description: Nome do repositório
+        webhookSecret:
+          type: string
+          description: Segredo opcional para configurar webhook manualmente (se não auto-configurado)
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [PUSH, PULL_REQUEST, ISSUE, RELEASE, CREATE]
+        repositoryId:
+          type: string
+          format: uuid
+        payload:
+          type: object
+          description: Conteúdo simplificado do evento
+        createdAt:
+          type: string
+          format: date-time
+
+    EventSummary:
+      type: object
+      description: Resumo do evento para listagens (sem payload pesado)
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [PUSH, PULL_REQUEST, ISSUE, RELEASE]
+        repositoryId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+    DiffFile:
+      type: object
+      description: Representa um arquivo alterado no diff
+      properties:
+        filename:
+          type: string
+          example: "src/main/java/Main.java"
+        status:
+          type: string
+          example: "modified"
+          enum: [added, modified, removed, renamed]
+        additions:
+          type: integer
+          example: 10
+        deletions:
+          type: integer
+          example: 2
+        patch:
+          type: string
+          description: O conteúdo do diff (patch git)
+          example: "@@ -1,5 +1,6 @@..."
+
+    RepositoryMetrics:
+      type: object
+      properties:
+        repositoryId:
+          type: string
+          format: uuid
+        period:
+          type: string
+          example: "7d"
+        commitsCount:
+          type: integer
+        pullRequests:
+          type: object
+          properties:
+            opened:
+              type: integer
+            merged:
+              type: integer
+            closed:
+              type: integer
+        issuesCount:
+          type: integer
+          description: Issues ativas vs fechadas
+        topContributors:
+          type: array
+          items:
+            type: object
+            properties:
+              login:
+                type: string
+              commits:
+                type: integer
+
+    AlertRule:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Muitos commits na master"
+        type:
+          type: string
+          example: "HIGH_FREQUENCY_COMMITS"
+        description:
+          type: string
+          example: "Detecta anomalias de volume de commits em curto período"
+        parameters:
+          type: object
+          example: {"threshold": 10, "interval_minutes": 5}
+
+    Alert:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        repositoryId:
+          type: string
+          format: uuid
+        ruleType:
+          type: string
+          example: "HIGH_FREQUENCY_COMMITS"
+        severity:
+          type: string
+          enum: [INFO, WARNING, CRITICAL]
+        message:
+          type: string
+        branch:
+          type: string
+          description: Nome da branch relacionada ao alerta (se houver)
+        authorLogin:
+          type: string
+          description: Login do autor do evento que gerou o alerta
+        authorAvatarUrl:
+          type: string
+          description: URL do avatar do autor
+        status:
+          type: string
+          enum: [OPEN, RESOLVED]
+        createdAt:
+          type: string
+          format: date-time
+        resolvedAt:
+          type: string
+          format: date-time
+
+    LoginInput:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          example: "123456"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        matricula:
+          type: string
+        avatarUrl:
+          type: string
+        role:
+          type: string
+          enum: [USER, ADMIN]
+
+    RegisterInput:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - matricula
+      properties:
+        name:
+          type: string
+          example: "João Silva"
+        email:
+          type: string
+          format: email
+          example: "joao@example.com"
+        password:
+          type: string
+          format: password
+          example: "123456"
+        matricula:
+          type: string
+          example: "2023001"
+        role:
+          type: string
+          enum: [USER, ADMIN]
+          default: USER
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Token JWT para autenticação
+        tokenType:
+          type: string
+          example: "Bearer"
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        avatarUrl:
+          type: string
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userEmail:
+          type: string
+          nullable: true
+          description: Email do usuário que realizou a ação (null se anônimo)
+        action:
+          type: string
+          example: "LOGIN"
+        resource:
+          type: string
+          example: "Auth"
+        anonymous:
+          type: boolean
+          description: Indica se a ação foi realizada por usuário não autenticado
+        details:
+          type: string
+          description: Detalhes da ação em formato JSON string
+        createdAt:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []

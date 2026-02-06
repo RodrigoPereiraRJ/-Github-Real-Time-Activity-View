@@ -1,0 +1,5 @@
+{
+  "name": "Github Monitor",
+  "description": "A modern dashboard to monitor GitHub repositories, track events, and manage alerts.",
+  "requestFramePermissions": []
+}

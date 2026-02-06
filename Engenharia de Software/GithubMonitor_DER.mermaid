@@ -1,0 +1,85 @@
+erDiagram
+    %% Núcleo de Acesso e Segurança
+    users ||--o{ repositories : "possui"
+    users ||--o{ audit_logs : "gera"
+    
+    %% Domínio Principal
+    repositories ||--o{ events : "registra"
+    contributors ||--o{ events : "origina"
+    
+    %% Eventos e Alertas
+    events ||--o{ alerts : "dispara"
+    alerts ||--o{ notifications : "envia"
+
+    users {
+        UUID id PK
+        VARCHAR name
+        VARCHAR email UK
+        VARCHAR password
+        VARCHAR github_id UK
+        VARCHAR matricula UK
+        LONGTEXT avatar_url
+        ENUM role "ADMIN, USER"
+        TIMESTAMP created_at
+    }
+
+    audit_logs {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR action
+        VARCHAR resource
+        BOOLEAN anonymous
+        JSON details
+        TIMESTAMP created_at
+    }
+
+    repositories {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR github_repo_id UK
+        VARCHAR name
+        VARCHAR owner
+        VARCHAR url
+        VARCHAR webhook_secret "Encrypted"
+        VARCHAR language
+        ENUM status "synced, failed, syncing, paused, pending"
+        TIMESTAMP last_synced_at
+        TIMESTAMP created_at
+    }
+
+    contributors {
+        UUID id PK
+        VARCHAR github_login UK
+        VARCHAR avatar_url
+        TIMESTAMP created_at
+    }
+
+    events {
+        UUID id PK
+        UUID repository_id FK
+        UUID contributor_id FK
+        VARCHAR type
+        VARCHAR delivery_id UK
+        JSON payload
+        TIMESTAMP created_at
+    }
+
+    alerts {
+        UUID id PK
+        UUID repository_id FK
+        UUID event_id FK
+        VARCHAR rule_type
+        ENUM severity "INFO, WARNING, CRITICAL"
+        VARCHAR message
+        ENUM status "OPEN, RESOLVED"
+        TIMESTAMP created_at
+        TIMESTAMP resolved_at
+    }
+
+    notifications {
+        UUID id PK
+        UUID alert_id FK
+        VARCHAR channel
+        VARCHAR status
+        TIMESTAMP sent_at
+    }
