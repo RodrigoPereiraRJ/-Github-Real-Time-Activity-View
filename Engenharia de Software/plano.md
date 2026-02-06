@@ -21,7 +21,7 @@ Baseado no UML aprovado, propõe-se a criação das seguintes tabelas:
 
 ### 2.1. Núcleo de Acesso e Segurança
 **Tabela: `users`** (Reflete classe `Usuário`)
-*   **Colunas**: `id` (PK), `name`, `email` (Unique), `github_id` (Unique, indexado para OAuth), `avatar_url` (LONGTEXT), `role` (ENUM: 'ADMIN', 'USER'), `created_at`.
+*   **Colunas**: `id` (PK), `name`, `email` (Unique), `github_id` (Unique), `avatar_url` (LONGTEXT), `role` (ENUM: 'ADMIN', 'USER'), `created_at`.
 *   *Justificativa*: Base para autenticação e autorização (RF10, RF11).
 
 **Tabela: `audit_logs`** (Reflete classe `AuditLog`)
@@ -61,17 +61,3 @@ Para atender aos requisitos de latência (<300ms p95 - RNF05), os seguintes índ
 2.  **Idempotência**: Índice Unique em `events(delivery_id)` para rejeição rápida de duplicatas.
 3.  **Métricas**: Índices nas colunas de data em `events` e `alerts` para agilização de queries de agregação (COUNT/GROUP BY).
 4.  **Busca de Contribuidores**: Índice em `contributors(github_login)`.
-
----
-
-## 4. Status de Implementação
-
-O esquema descrito acima está **totalmente implementado e versionado** via Flyway:
-1.  **V1**: Estrutura base (Users, Repos, Contributors, Events, Alerts, Notifications).
-2.  **V2**: Expansão de tipos de Eventos.
-3.  **V3**: Refatoração do sistema de Alertas (Remoção de alert_rules).
-4.  **V4**: Auditoria para usuários anônimos.
-5.  **V5**: Suporte a linguagem de programação em Repositórios.
-6.  **V6**: Expansão de armazenamento para URLs de Avatar.
-
-Para recriar o banco de dados do zero, utilize o arquivo `schema.sql` (que reflete o estado consolidado) ou execute as migrações Flyway sequencialmente.
