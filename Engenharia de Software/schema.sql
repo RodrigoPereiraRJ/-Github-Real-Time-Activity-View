@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     github_id VARCHAR(255) UNIQUE NOT NULL,
-    avatar_url VARCHAR(500),
+    avatar_url LONGTEXT,
     role ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_users_email (email),
@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS repositories (
     owner VARCHAR(255) NOT NULL,
     url VARCHAR(500) NOT NULL,
     webhook_secret VARCHAR(255), -- Segredo criptografado
+    language VARCHAR(50),
     last_synced_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_repositories_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -78,6 +79,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     action VARCHAR(255) NOT NULL,
     resource VARCHAR(255) NOT NULL,
     details JSON,
+    anonymous BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_audit_logs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_audit_logs_created_at (created_at)
@@ -87,8 +89,9 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 CREATE TABLE IF NOT EXISTS notifications (
     id CHAR(36) PRIMARY KEY, -- UUID
     alert_id CHAR(36) NOT NULL,
-    channel VARCHAR(50) NOT NULL, -- Ex: EMAIL, SLACK
-    status VARCHAR(50) NOT NULL, -- Ex: SENT, FAILED
-    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    type ENUM('EMAIL', 'SLACK', 'DISCORD') NOT NULL,
+    status ENUM('PENDING', 'SENT', 'FAILED') DEFAULT 'PENDING',
+    sent_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_notifications_alert FOREIGN KEY (alert_id) REFERENCES alerts(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
