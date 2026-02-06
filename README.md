@@ -4,6 +4,8 @@
 
 ## Visão Geral
 
+![Dashboard Github Monitor](https://www.upload.ee/image/19053327/Captura_de_tela_2026-02-06_200708.png)
+
 O **Github Monitor** é uma solução corporativa robusta para monitoramento, auditoria e análise de repositórios do GitHub. Projetado para oferecer visibilidade em tempo real sobre o ciclo de vida de desenvolvimento, o sistema integra coleta de eventos via Webhooks, dashboards analíticos, sistemas de alerta configuráveis e relatórios detalhados.
 
 A aplicação segue uma arquitetura moderna e desacoplada, separando o backend (API RESTful em Java/Spring Boot) do frontend (SPA em React), garantindo escalabilidade, segurança e facilidade de manutenção.
