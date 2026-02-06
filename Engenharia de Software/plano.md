@@ -21,17 +21,17 @@ Baseado no UML aprovado, propõe-se a criação das seguintes tabelas:
 
 ### 2.1. Núcleo de Acesso e Segurança
 **Tabela: `users`** (Reflete classe `Usuário`)
-*   **Colunas**: `id` (PK), `name`, `email` (Unique), `github_id` (Unique, indexado para OAuth), `avatar_url`, `role` (ENUM: 'ADMIN', 'USER'), `created_at`.
+*   **Colunas**: `id` (PK), `name`, `email` (Unique), `github_id` (Unique, indexado para OAuth), `avatar_url` (LONGTEXT), `role` (ENUM: 'ADMIN', 'USER'), `created_at`.
 *   *Justificativa*: Base para autenticação e autorização (RF10, RF11).
 
 **Tabela: `audit_logs`** (Reflete classe `AuditLog`)
-*   **Colunas**: `id` (PK), `user_id` (FK), `action` (Ex: 'DELETE_REPO'), `resource` (Ex: 'Repo:123'), `details` (JSON), `created_at`.
-*   *Justificativa*: Requisito de Compliance (Seção 9), retenção de 90 dias.
+*   **Colunas**: `id` (PK), `user_id` (FK), `action` (Ex: 'DELETE_REPO'), `resource` (Ex: 'Repo:123'), `details` (JSON), `anonymous` (Boolean), `created_at`.
+*   *Justificativa*: Requisito de Compliance (Seção 9), retenção de 90 dias. Coluna `anonymous` permite logs de ações não autenticadas.
 
 ### 2.2. Domínio Principal
 **Tabela: `repositories`** (Reflete classe `Repositório`)
-*   **Colunas**: `id` (PK), `user_id` (FK), `github_repo_id` (Unique), `name`, `owner`, `url`, `webhook_secret` (Criptografado), `last_synced_at`, `created_at`.
-*   *Justificativa*: O `webhook_secret` é crítico para o RF03 (Validação HMAC).
+*   **Colunas**: `id` (PK), `user_id` (FK), `github_repo_id` (Unique), `name`, `owner`, `url`, `webhook_secret` (Criptografado), `language` (Ex: 'Java'), `last_synced_at`, `created_at`.
+*   *Justificativa*: O `webhook_secret` é crítico para o RF03 (Validação HMAC). Coluna `language` facilita filtros e métricas.
 
 **Tabela: `contributors`** (Reflete classe `Contribuidor`)
 *   **Colunas**: `id` (PK), `github_login` (Unique), `avatar_url`, `created_at`.
@@ -39,20 +39,16 @@ Baseado no UML aprovado, propõe-se a criação das seguintes tabelas:
 
 ### 2.3. Eventos e Métricas
 **Tabela: `events`** (Reflete classe `Evento`)
-*   **Colunas**: `id` (PK), `repository_id` (FK), `contributor_id` (FK), `type` (Ex: 'PUSH', 'PR'), `delivery_id` (Unique - Idempotência RF04), `payload` (JSON), `created_at`.
+*   **Colunas**: `id` (PK), `repository_id` (FK), `contributor_id` (FK), `type` (Ex: 'PUSH', 'PR', 'CREATE'), `delivery_id` (Unique - Idempotência RF04), `payload` (JSON), `created_at`.
 *   *Justificativa*: Tabela central de alto volume. O `delivery_id` garante que não processemos o mesmo webhook duas vezes. O `payload` JSON permite flexibilidade para diferentes tipos de eventos.
 
 ### 2.4. Monitoramento e Alertas
-**Tabela: `alert_rules`** (Reflete classe `RegraAlerta`)
-*   **Colunas**: `id` (PK), `repository_id` (FK), `name`, `type`, `parameters` (JSON - Configuração da regra), `is_active` (Boolean), `created_at`.
-*   *Justificativa*: Configuração dinâmica de regras (RF07).
-
 **Tabela: `alerts`** (Reflete classe `Alerta`)
-*   **Colunas**: `id` (PK), `event_id` (FK), `rule_id` (FK), `severity` (ENUM: 'INFO', 'WARNING', 'CRITICAL'), `message`, `status` (ENUM: 'OPEN', 'RESOLVED'), `created_at`, `resolved_at`.
-*   *Justificativa*: Histórico de incidentes (RF08).
+*   **Colunas**: `id` (PK), `event_id` (FK), `repository_id` (FK), `rule_type` (Ex: 'HIGH_FREQUENCY_COMMITS'), `severity` (ENUM: 'INFO', 'WARNING', 'CRITICAL'), `message`, `status` (ENUM: 'OPEN', 'RESOLVED'), `created_at`, `resolved_at`.
+*   *Justificativa*: Histórico de incidentes (RF08). **Nota**: A antiga tabela `alert_rules` foi descontinuada; as regras agora são definidas via código (Enum `AlertRuleType`) para simplificação e performance, referenciadas aqui por `rule_type`.
 
 **Tabela: `notifications`** (Reflete classe `Notificação`)
-*   **Colunas**: `id` (PK), `alert_id` (FK), `channel` (Ex: 'EMAIL', 'WEB_UI'), `status` (Ex: 'SENT', 'FAILED'), `sent_at`.
+*   **Colunas**: `id` (PK), `alert_id` (FK), `type` (ENUM: 'EMAIL', 'SLACK', 'DISCORD'), `status` (ENUM: 'PENDING', 'SENT', 'FAILED'), `sent_at`, `created_at`.
 *   *Justificativa*: Rastreio de entregas de notificações.
 
 ---
@@ -68,8 +64,14 @@ Para atender aos requisitos de latência (<300ms p95 - RNF05), os seguintes índ
 
 ---
 
-## 4. Próximos Passos
+## 4. Status de Implementação
 
-Após a aprovação deste plano:
-1.  **Criação do DER Visual**: Gerar o diagrama visual (usando Mermaid ou ferramenta similar compatível com Draw.io).
-2.  **Script SQL DDL**: Criar o arquivo `.sql` com os comandos `CREATE TABLE` para validação técnica.
+O esquema descrito acima está **totalmente implementado e versionado** via Flyway:
+1.  **V1**: Estrutura base (Users, Repos, Contributors, Events, Alerts, Notifications).
+2.  **V2**: Expansão de tipos de Eventos.
+3.  **V3**: Refatoração do sistema de Alertas (Remoção de alert_rules).
+4.  **V4**: Auditoria para usuários anônimos.
+5.  **V5**: Suporte a linguagem de programação em Repositórios.
+6.  **V6**: Expansão de armazenamento para URLs de Avatar.
+
+Para recriar o banco de dados do zero, utilize o arquivo `schema.sql` (que reflete o estado consolidado) ou execute as migrações Flyway sequencialmente.
