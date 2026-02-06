@@ -39,7 +39,7 @@ A aplicação segue uma arquitetura moderna e desacoplada, separando o backend (
 O backend foi construído seguindo os princípios de **Clean Architecture** e **Domain-Driven Design (DDD)**, organizado em camadas bem definidas para garantir a separação de responsabilidades.
 
 - **Tecnologia**: Java 21, Spring Boot 3.4.1
-- **Gerenciamento de Dependências**: Maven ([pom.xml](file:///c:/Users/rodrigo3301/OneDrive/Desktop/Github Monitor/Github_Monitor/pom.xml))
+- **Gerenciamento de Dependências**: Maven ([pom.xml]
 - **Estrutura de Pacotes**:
   - `config`: Configurações de segurança e beans do Spring.
   - `controller`: Endpoints RESTful (API Surface).
