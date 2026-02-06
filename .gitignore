@@ -44,7 +44,7 @@ logs/
 # Sensitive Data
 secrets.properties
 application-secret.properties
-application-local.properties
+ application-local.properties
 *-local.properties
 *.key
 *.pem
