@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     id CHAR(36) PRIMARY KEY, -- UUID
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255),
     github_id VARCHAR(255) UNIQUE NOT NULL,
     avatar_url LONGTEXT,
     role ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
