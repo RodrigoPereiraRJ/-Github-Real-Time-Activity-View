@@ -391,7 +391,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         >
                             {t('cancel')}
                         </Button>
-                        <Button type="submit" disabled={isSubmitting}>
+                        <Button 
+                            type="submit" 
+                            disabled={isSubmitting}
+                            variant="ghost"
+                            className="text-txt-main hover:bg-surface"
+                        >
                             {isSubmitting ? t('adding') : t('add')}
                         </Button>
                     </div>
