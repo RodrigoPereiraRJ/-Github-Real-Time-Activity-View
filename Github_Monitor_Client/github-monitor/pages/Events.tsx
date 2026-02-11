@@ -5,7 +5,7 @@ import { API_BASE_URL } from '../constants';
 import { Event, Repository } from '../types';
 import { useLanguage } from '../services/languageContext';
 import { Card, Button } from '../components/ui';
-import { GitCommit, GitPullRequest, AlertCircle, Calendar as CalendarIcon, Filter, ChevronDown, Check, Rocket, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { GitCommit, GitPullRequest, AlertCircle, Calendar as CalendarIcon, Filter, ChevronDown, Check, Rocket, ChevronLeft, ChevronRight, FileText, ExternalLink } from 'lucide-react';
 import { DiffModal } from '../components/DiffModal';
 
 export const Events: React.FC = () => {
@@ -421,8 +421,8 @@ export const Events: React.FC = () => {
                                 </div>
                             )}
                             
-                            {(event.type === 'PUSH' || event.type === 'PULL_REQUEST') && (
-                                <div className="mt-3">
+                            <div className="mt-3 flex gap-2 flex-wrap">
+                                {(event.type === 'PUSH' || event.type === 'PULL_REQUEST') && (
                                     <Button 
                                         variant="ghost" 
                                         size="sm" 
@@ -432,8 +432,19 @@ export const Events: React.FC = () => {
                                         <FileText size={14} />
                                         {t('view_changes') || 'View Changes'}
                                     </Button>
-                                </div>
-                            )}
+                                )}
+                                {event.url && (
+                                    <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="text-xs h-7 px-2 text-txt-sec hover:text-primary hover:bg-background border border-transparent hover:border-border gap-1.5 transition-all"
+                                        onClick={() => window.open(event.url, '_blank')}
+                                    >
+                                        <ExternalLink size={14} />
+                                        GitHub
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     </Card>
                 ))

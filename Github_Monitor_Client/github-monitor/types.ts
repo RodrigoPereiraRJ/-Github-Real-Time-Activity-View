@@ -29,6 +29,7 @@ export interface Event {
   avatarUrl?: string; 
   branch?: string;
   message: string;
+  url?: string;
   createdAt: string;
 }
 

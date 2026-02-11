@@ -37,27 +37,49 @@ interface NavItemProps {
   };
   isActive: boolean;
   onClick: () => void;
+  isExpanded: boolean;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ item, isActive, onClick }) => {
+const NavItem: React.FC<NavItemProps> = ({ item, isActive, onClick, isExpanded }) => {
   return (
     <NavLink
       to={item.path}
       onClick={onClick}
-      className={`flex items-center justify-between px-3 py-2.5 rounded-md transition-all mb-1 ${
-        isActive 
+      className={`flex items-center relative group transition-all duration-300 mb-1 rounded-md
+        ${isExpanded 
+          ? 'justify-between px-3 py-2.5' 
+          : 'justify-center px-2 py-3'
+        }
+        ${isActive 
           ? 'bg-background border border-border text-txt-main shadow-sm' 
           : 'text-txt-sec hover:text-txt-main hover:bg-background/50'
-      }`}
+        }
+      `}
+      title={!isExpanded ? item.label : undefined}
     >
-      <div className="flex items-center gap-3">
-          <item.icon size={18} />
-          <span className="text-sm font-medium">{item.label}</span>
-      </div>
-      {item.badge && (
-          <span className="bg-red-500/10 text-red-500 text-xs font-bold px-2 py-0.5 rounded-full border border-red-500/20">
-              {item.badge}
+      <div className={`flex items-center transition-all duration-300 ${isExpanded ? 'gap-3' : 'gap-0'}`}>
+          <div className={`transition-transform duration-300 ${!isExpanded && 'group-hover:scale-110'}`}>
+            <item.icon size={20} />
+          </div>
+          
+          <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out
+            ${isExpanded 
+              ? 'w-auto opacity-100 ml-0 translate-x-0 delay-100' 
+              : 'w-0 opacity-0 -ml-2 -translate-x-4 absolute pointer-events-none delay-0'
+            }
+          `}>
+            {item.label}
           </span>
+      </div>
+      
+      {item.badge && (
+          isExpanded ? (
+            <span className="bg-red-500/10 text-red-500 text-xs font-bold px-2 py-0.5 rounded-full border border-red-500/20 whitespace-nowrap animate-in fade-in zoom-in duration-300">
+                {item.badge}
+            </span>
+          ) : (
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-surface animate-in zoom-in duration-300"></span>
+          )
       )}
     </NavLink>
   );
@@ -70,6 +92,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [alertCount, setAlertCount] = useState(0);
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
 
   const fetchAlerts = async () => {
     try {
@@ -171,14 +194,16 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { label: t('settings'), path: '/settings', icon: Settings },
   ];
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-surface">
-      <div className="p-6 flex items-center gap-3">
-        <GithubLogo className="w-8 h-8 text-txt-main" />
-        <span className="text-xl font-bold text-txt-main tracking-tight">Monitor</span>
+  const SidebarContent = ({ isExpanded = true }: { isExpanded?: boolean }) => (
+    <div className={`flex flex-col h-full bg-surface border-r border-border transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'w-64' : 'w-20'}`}>
+      <div className={`h-16 flex items-center shrink-0 transition-all duration-300 ${isExpanded ? 'px-6 gap-3' : 'justify-center px-0'}`}>
+        <GithubLogo className="w-8 h-8 text-txt-main shrink-0 transition-transform duration-300 hover:scale-110" />
+        <span className={`text-xl font-bold text-txt-main tracking-tight whitespace-nowrap overflow-hidden transition-all duration-300 ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
+            Monitor
+        </span>
       </div>
       
-      <div className="flex-1 px-4 overflow-y-auto py-4">
+      <div className="flex-1 px-3 overflow-y-auto py-4 overflow-x-hidden scrollbar-hide">
         <nav className="space-y-6">
             <div>
                 {mainNavItems.map((item) => (
@@ -187,29 +212,34 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         item={item} 
                         isActive={location.pathname === item.path}
                         onClick={() => setMobileMenuOpen(false)}
+                        isExpanded={isExpanded}
                     />
                 ))}
             </div>
 
             <div>
-                <p className="px-3 text-xs font-semibold text-txt-sec uppercase tracking-wider mb-2">{t('settings')}</p>
+                <p className={`px-3 text-xs font-semibold text-txt-sec uppercase tracking-wider mb-2 transition-opacity duration-300 whitespace-nowrap ${isExpanded ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
+                    {t('settings')}
+                </p>
                 {settingsNavItems.map((item) => (
                     <NavItem 
                         key={item.path} 
                         item={item} 
                         isActive={location.pathname === item.path}
                         onClick={() => setMobileMenuOpen(false)}
+                        isExpanded={isExpanded}
                     />
                 ))}
             </div>
         </nav>
       </div>
 
-      <div className="p-4">
-        <div className="flex items-center gap-3">
+      <div className={`p-4 border-t border-border shrink-0 transition-all duration-300 ${isExpanded ? '' : 'flex justify-center'}`}>
+        <div className={`flex items-center transition-all duration-300 ${isExpanded ? 'gap-3' : 'gap-0 justify-center'}`}>
             <button 
                 onClick={() => setIsAvatarModalOpen(true)}
                 className="group relative w-10 h-10 rounded-full bg-background flex items-center justify-center text-txt-main font-bold border border-border overflow-hidden shrink-0 hover:ring-2 hover:ring-primary transition-all"
+                title={!isExpanded ? (user?.name || 'DevAdmin') : undefined}
             >
                 {user?.avatarUrl ? (
                     <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -220,13 +250,19 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     <Camera size={14} className="text-white" />
                 </div>
             </button>
+            
             <div 
-                className="flex-1 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                className={`overflow-hidden cursor-pointer hover:opacity-80 transition-all duration-300 ease-in-out ${isExpanded ? 'flex-1 opacity-100 w-auto ml-0' : 'w-0 opacity-0 ml-0'}`}
                 onClick={() => setIsAvatarModalOpen(true)}
             >
                 <p className="text-sm font-bold text-txt-main truncate">{user?.name || 'DevAdmin'}</p>
             </div>
-             <button onClick={handleLogout} className="text-txt-sec hover:text-txt-main" title={t('logout')}>
+            
+             <button 
+                onClick={handleLogout} 
+                className={`text-txt-sec hover:text-txt-main transition-all duration-300 ${isExpanded ? 'opacity-100 w-auto' : 'w-0 opacity-0 overflow-hidden'}`} 
+                title={t('logout')}
+             >
                 <LogOut size={18} />
              </button>
         </div>
@@ -237,12 +273,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   return (
     <div className="min-h-screen bg-background flex font-sans text-txt-main transition-colors duration-300">
       {/* Sidebar Desktop */}
-      <aside className="hidden md:block w-64 fixed h-full z-20">
-        <SidebarContent />
+      <aside 
+          className={`hidden md:block fixed h-full z-20 transition-all duration-300 ease-in-out ${isSidebarHovered ? 'w-64 shadow-xl' : 'w-20'}`}
+          onMouseEnter={() => setIsSidebarHovered(true)}
+          onMouseLeave={() => setIsSidebarHovered(false)}
+          onClick={() => !isSidebarHovered && setIsSidebarHovered(true)}
+      >
+        <SidebarContent isExpanded={isSidebarHovered} />
       </aside>
 
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 w-full bg-surface z-50 flex items-center justify-between p-4">
+      <div className="md:hidden fixed top-0 w-full bg-surface z-50 flex items-center justify-between p-4 shadow-sm border-b border-border">
         <div className="flex items-center gap-2">
             <GithubLogo className="w-6 h-6 text-txt-main" />
             <span className="font-bold text-txt-main">Monitor</span>
@@ -253,14 +294,24 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </div>
 
       {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden bg-background">
-            <SidebarContent />
-        </div>
-      )}
+      <div 
+          className={`fixed inset-0 z-40 md:hidden bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${
+              mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+          onClick={() => setMobileMenuOpen(false)}
+      >
+          <div 
+              className={`absolute left-0 top-0 h-full bg-surface shadow-2xl w-64 transform transition-transform duration-300 ease-in-out ${
+                  mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+              }`}
+              onClick={e => e.stopPropagation()}
+          >
+              <SidebarContent isExpanded={true} />
+          </div>
+      </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
+      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out ${isSidebarHovered ? 'md:ml-64' : 'md:ml-20'}`}>
         
         {/* Top Header Bar */}
         <header className="h-16 bg-background flex items-center justify-between px-6 sticky top-0 z-10 transition-colors duration-300">
