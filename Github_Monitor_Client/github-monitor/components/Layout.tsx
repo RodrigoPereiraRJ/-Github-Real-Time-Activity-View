@@ -395,7 +395,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                             type="submit" 
                             disabled={isSubmitting}
                             variant="ghost"
-                            className="text-txt-main hover:bg-surface"
+                            className="text-txt-main hover:bg-[#27272A]"
                         >
                             {isSubmitting ? t('adding') : t('add')}
                         </Button>
