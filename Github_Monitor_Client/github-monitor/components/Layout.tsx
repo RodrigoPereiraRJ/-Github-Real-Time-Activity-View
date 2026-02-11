@@ -332,7 +332,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <div className="flex items-center gap-4">
                 <Button 
                     onClick={() => setIsRepoModalOpen(true)}
-                    className="gap-2 bg-blue-600 hover:bg-blue-700 text-white border-none"
+                    variant="ghost"
+                    className="gap-2 text-txt-main hover:bg-surface"
                 >
                     <Plus size={16} /> {t('new_repo')}
                 </Button>
