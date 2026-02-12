@@ -26,8 +26,16 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         String method = request.getMethod();
         String details = "Method: " + method + ", Path: " + path + ", Error: " + authException.getMessage();
 
+        // Log to console for Render visibility (in case DB log fails)
+        System.err.println("UNAUTHORIZED ACCESS: " + details);
+        authException.printStackTrace();
+
         // Logs authentication failure (user is likely anonymous or token is invalid)
-        auditLogService.logSecurityEvent("AUTHENTICATION_FAILURE", "API", details);
+        try {
+            auditLogService.logSecurityEvent("AUTHENTICATION_FAILURE", "API", details);
+        } catch (Exception e) {
+            System.err.println("Failed to log security event: " + e.getMessage());
+        }
 
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
     }
