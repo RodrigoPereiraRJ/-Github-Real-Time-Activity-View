@@ -13,12 +13,25 @@ public class WindowsNotificationServiceImpl implements NotificationService {
 
     @PostConstruct
     public void init() {
-        if (!SystemTray.isSupported()) {
-            System.err.println("SystemTray is not supported. Notifications will only be logged.");
+        // Safe check for OS to prevent errors on Linux/Server environments (Render)
+        String os = System.getProperty("os.name").toLowerCase();
+        if (!os.contains("win")) {
+            System.out.println("Non-Windows OS detected (" + os + "). Notifications will only be logged to console.");
             return;
         }
 
         try {
+            // Extra safety check for Headless mode
+            if (GraphicsEnvironment.isHeadless()) {
+                 System.out.println("Headless mode detected. Notifications will only be logged to console.");
+                 return;
+            }
+
+            if (!SystemTray.isSupported()) {
+                System.err.println("SystemTray is not supported. Notifications will only be logged.");
+                return;
+            }
+            
             tray = SystemTray.getSystemTray();
             
             // Create a simple icon programmatically to avoid file dependency
@@ -29,12 +42,9 @@ public class WindowsNotificationServiceImpl implements NotificationService {
             trayIcon.setToolTip("Github Monitor Running");
             tray.add(trayIcon);
             System.out.println("Windows Notification Service initialized successfully.");
-        } catch (AWTException e) {
-            System.err.println("TrayIcon could not be added.");
-            e.printStackTrace();
-        } catch (Exception e) {
-             System.err.println("Error initializing Notification Service: " + e.getMessage());
-             e.printStackTrace();
+        } catch (Throwable e) {
+             // Catch Throwable to ensure application startup never fails due to notification service
+             System.err.println("Error initializing Notification Service (Safe Fallback): " + e.getMessage());
         }
     }
 
