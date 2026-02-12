@@ -38,6 +38,7 @@ public class AuditLog {
     private Boolean anonymous;
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String details;
 
     @Column(name = "created_at", updatable = false)
