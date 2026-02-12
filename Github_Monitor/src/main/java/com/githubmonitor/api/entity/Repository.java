@@ -21,8 +21,7 @@ public class Repository {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)")
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(columnDefinition = "uuid")
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

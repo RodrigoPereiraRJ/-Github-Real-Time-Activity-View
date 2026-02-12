@@ -123,6 +123,16 @@
         -webkit-animation: animate-svg-stroke-2 2s cubic-bezier(0.47, 0, 0.745, 0.715) 0.12s infinite alternate;
         animation: animate-svg-stroke-2 2s cubic-bezier(0.47, 0, 0.745, 0.715) 0.12s infinite alternate;
       }
+
+      /* Autofill Input Fix */
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover, 
+      input:-webkit-autofill:focus, 
+      input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px var(--color-background) inset !important;
+        -webkit-text-fill-color: var(--color-text-main) !important;
+        transition: background-color 5000s ease-in-out 0s;
+      }
     </style>
   <script type="importmap">
 {

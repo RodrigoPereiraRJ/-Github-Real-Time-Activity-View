@@ -1,4 +1,5 @@
 import React from 'react';
+import { Check, AlertCircle } from 'lucide-react';
 
 // --- BUTTON ---
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -34,17 +35,37 @@ export const Button: React.FC<ButtonProps> = ({ variant = 'primary', size = 'md'
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  success?: boolean;
 }
 
-export const Input: React.FC<InputProps> = ({ label, error, className = '', ...props }) => {
+export const Input: React.FC<InputProps> = ({ label, error, success, className = '', ...props }) => {
   return (
     <div className="w-full">
       {label && <label className="block text-sm font-medium text-txt-sec mb-1.5">{label}</label>}
-      <input
-        className={`w-full bg-background border border-border rounded-md px-3 py-2 text-sm text-txt-main placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${error ? 'border-red-500 focus:ring-red-500' : ''} ${className}`}
-        {...props}
-      />
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      <div className="relative">
+        <input
+          className={`w-full bg-background border rounded-md px-3 py-2 text-sm text-txt-main placeholder-gray-500 focus:outline-none focus:border-txt-sec transition-all 
+            ${error || success ? 'pr-10' : ''}
+            border-border 
+            ${className}`}
+          {...props}
+        />
+        {error && (
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-red-500 animate-in fade-in zoom-in duration-200">
+                <AlertCircle size={16} />
+            </div>
+        )}
+        {success && !error && (
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-green-500 animate-in fade-in zoom-in duration-200">
+                <Check size={16} />
+            </div>
+        )}
+      </div>
+      {error && (
+        <p className="mt-1 text-xs text-red-500 flex items-center gap-1 animate-in slide-in-from-top-1 duration-200" role="alert">
+            {error}
+        </p>
+      )}
     </div>
   );
 };

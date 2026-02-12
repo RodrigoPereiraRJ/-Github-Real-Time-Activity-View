@@ -20,15 +20,14 @@ public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)")
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(columnDefinition = "uuid")
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "alert_id", nullable = false)
     private Alert alert;
 
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     private String channel;
 
     @Column(nullable = false)

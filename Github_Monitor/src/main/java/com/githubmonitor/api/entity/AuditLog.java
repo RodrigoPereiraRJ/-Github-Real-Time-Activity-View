@@ -21,8 +21,7 @@ public class AuditLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)")
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(columnDefinition = "uuid")
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,7 +37,7 @@ public class AuditLog {
     @Column(columnDefinition = "boolean default false")
     private Boolean anonymous;
 
-    @Column(columnDefinition = "json")
+    @Column(columnDefinition = "jsonb")
     private String details;
 
     @Column(name = "created_at", updatable = false)

@@ -20,16 +20,14 @@ public class Alert {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)")
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(columnDefinition = "uuid")
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
     private Event event;
 
-    @Column(name = "repository_id", nullable = false, columnDefinition = "CHAR(36)")
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "repository_id", nullable = false)
     private UUID repositoryId;
 
     @Column(name = "rule_type", nullable = false)

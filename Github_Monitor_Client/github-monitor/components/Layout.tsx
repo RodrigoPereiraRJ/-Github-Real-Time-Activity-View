@@ -6,26 +6,8 @@ import { useLanguage } from '../services/languageContext';
 import { Button, Input } from './ui'; 
 import { api } from '../services/api'; 
 import { AvatarEditor } from './AvatarEditor';
+import { GithubLogo } from './GithubLogo';
 import { API_BASE_URL } from '../constants';
-
-const GithubLogo = ({ className }: { className?: string }) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        className={className} 
-        aria-hidden="true"
-    >
-        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" stroke="#C9D1D9" fill="none" strokeWidth="2px" className="svg-elem-1"></path>
-        <path d="M9 18c-4.51 2-5-2-7-2" stroke="#C9D1D9" fill="none" strokeWidth="2px" className="svg-elem-2"></path>
-    </svg>
-);
 
 // Extract NavItemProps and Component to avoid re-creation on render and fix key prop type issue
 interface NavItemProps {
@@ -140,6 +122,19 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const [isRepoModalOpen, setIsRepoModalOpen] = useState(false);
   const [newRepo, setNewRepo] = useState({ owner: '', name: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [ownerError, setOwnerError] = useState('');
+  const [nameError, setNameError] = useState('');
+
+  // Validation Functions
+  const validateOwner = (value: string) => {
+    if (!value.trim()) return t('owner_required') || 'Owner is required';
+    return '';
+  };
+
+  const validateName = (value: string) => {
+    if (!value.trim()) return t('repo_name_required') || 'Repository name is required';
+    return '';
+  };
 
   // Avatar Modal State
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
@@ -151,6 +146,16 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   const handleAddRepo = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const ownerErr = validateOwner(newRepo.owner);
+    const nameErr = validateName(newRepo.name);
+    
+    if (ownerErr || nameErr) {
+        setOwnerError(ownerErr);
+        setNameError(nameErr);
+        return;
+    }
+
     setIsSubmitting(true);
     try {
         await api.repositories.create({
@@ -161,6 +166,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         });
         
         setNewRepo({ owner: '', name: '' });
+        setOwnerError('');
+        setNameError('');
         setIsRepoModalOpen(false);
         
         if (location.pathname === '/repositories') {
@@ -366,20 +373,32 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     <p className="text-sm text-txt-sec">{t('add_repo_desc')}</p>
                 </div>
                 
-                <form onSubmit={handleAddRepo} className="space-y-4">
+                <form onSubmit={handleAddRepo} className="space-y-4" noValidate>
                     <Input 
                         label={t('owner')} 
                         placeholder="e.g. facebook" 
                         value={newRepo.owner}
-                        onChange={e => setNewRepo({...newRepo, owner: e.target.value})}
-                        required
+                        onChange={e => {
+                            const val = e.target.value;
+                            setNewRepo({...newRepo, owner: val});
+                            if (ownerError) setOwnerError(validateOwner(val));
+                        }}
+                        onBlur={() => setOwnerError(validateOwner(newRepo.owner))}
+                        error={ownerError}
+                        success={!ownerError && newRepo.owner.length > 0}
                     />
                     <Input 
                         label={t('repo_name')}
                         placeholder="e.g. react" 
                         value={newRepo.name}
-                        onChange={e => setNewRepo({...newRepo, name: e.target.value})}
-                        required
+                        onChange={e => {
+                            const val = e.target.value;
+                            setNewRepo({...newRepo, name: val});
+                            if (nameError) setNameError(validateName(val));
+                        }}
+                        onBlur={() => setNameError(validateName(newRepo.name))}
+                        error={nameError}
+                        success={!nameError && newRepo.name.length > 0}
                     />
                     
                     <div className="pt-4 flex justify-end gap-3">

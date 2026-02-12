@@ -133,6 +133,18 @@ export const translations = {
     creating_account: 'Creating account...',
     already_have_account: 'Already have an account?',
     login_link: 'Log in',
+    
+    // Validation
+    email_required: 'Email is required',
+    email_invalid: 'Invalid email format',
+    password_required: 'Password is required',
+    password_length: 'Password must be at least 8 characters',
+    password_lowercase: 'Password must contain a lowercase letter',
+    password_number: 'Password must contain a number',
+    owner_required: 'Owner is required',
+    repo_name_required: 'Repository name is required',
+    invalid_credentials: 'Invalid credentials. Try again.',
+
 
     // Export
     export_title: 'Export Dashboard Data',
@@ -284,6 +296,18 @@ export const translations = {
     creating_account: 'Criando conta...',
     already_have_account: 'Já tem uma conta?',
     login_link: 'Entrar',
+    
+    // Validation
+    email_required: 'O email é obrigatório',
+    email_invalid: 'Formato de email inválido',
+    password_required: 'A senha é obrigatória',
+    password_length: 'A senha deve ter pelo menos 8 caracteres',
+    password_lowercase: 'A senha deve conter uma letra minúscula',
+    password_number: 'A senha deve conter um número',
+    owner_required: 'O dono é obrigatório',
+    repo_name_required: 'O nome do repositório é obrigatório',
+    invalid_credentials: 'Credenciais inválidas. Tente novamente.',
+
 
     // Export
     export_title: 'Exportar Dados do Painel',

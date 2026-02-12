@@ -20,8 +20,7 @@ public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)")
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(columnDefinition = "uuid")
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,7 +38,7 @@ public class Event {
     @Column(name = "delivery_id", nullable = false, unique = true)
     private String deliveryId;
 
-    @Column(columnDefinition = "json")
+    @Column(columnDefinition = "jsonb")
     private String payload;
 
     @Column(name = "created_at", updatable = false)

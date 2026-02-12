@@ -21,8 +21,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)")
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(columnDefinition = "uuid")
     private UUID id;
 
     @Column(nullable = false)
@@ -40,7 +39,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String matricula;
 
-    @Column(name = "avatar_url", columnDefinition = "LONGTEXT")
+    @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatarUrl;
 
     @Enumerated(EnumType.STRING)

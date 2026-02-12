@@ -1,2 +1,0 @@
--- V2__Add_Create_Event_Type.sql
-ALTER TABLE events MODIFY COLUMN type ENUM('PUSH', 'PULL_REQUEST', 'ISSUE', 'RELEASE', 'CREATE') NOT NULL;
