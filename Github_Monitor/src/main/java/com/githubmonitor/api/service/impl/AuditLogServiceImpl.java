@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -50,14 +51,14 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     @Override
     @Async // Audit logging should not block main business logic
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void log(User user, String action, String resource, Object details) {
         saveLog(user, action, resource, details);
     }
 
     @Override
     @Async
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void log(String action, String resource, Object details) {
         User user = getCurrentUser();
         saveLog(user, action, resource, details);
@@ -65,7 +66,7 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     @Override
     @Async
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void logSecurityEvent(String action, String resource, String details) {
         // Security events might not have a logged-in user context available (e.g., failed login)
         // Try to get user from context, otherwise null
