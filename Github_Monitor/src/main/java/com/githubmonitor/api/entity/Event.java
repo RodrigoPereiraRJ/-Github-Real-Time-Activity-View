@@ -39,6 +39,7 @@ public class Event {
     private String deliveryId;
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String payload;
 
     @Column(name = "created_at", updatable = false)
