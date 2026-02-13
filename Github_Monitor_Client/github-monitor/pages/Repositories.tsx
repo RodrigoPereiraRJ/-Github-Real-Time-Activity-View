@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui';
 import { api } from '../services/api';
 import { API_BASE_URL } from '../constants';
@@ -17,6 +17,14 @@ export const Repositories: React.FC = () => {
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
   const [repoToDelete, setRepoToDelete] = useState<Repository | null>(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const query = searchParams.get('search');
+    if (query) {
+      setSearchTerm(query);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     loadRepos();
