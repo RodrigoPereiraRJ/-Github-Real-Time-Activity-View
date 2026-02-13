@@ -73,7 +73,7 @@ export const Input: React.FC<InputProps> = ({ label, error, success, className =
 // --- CARD ---
 export const Card: React.FC<{ children: React.ReactNode; className?: string; title?: string; action?: React.ReactNode }> = ({ children, className = '', title, action }) => {
   return (
-    <div className={`bg-surface rounded-lg p-6 ${className}`}>
+    <div className={`bg-surface rounded-lg p-6 border border-border ${className}`}>
         {(title || action) && (
             <div className="flex justify-between items-center mb-4">
                 {title && <h3 className="text-lg font-semibold text-txt-main">{title}</h3>}

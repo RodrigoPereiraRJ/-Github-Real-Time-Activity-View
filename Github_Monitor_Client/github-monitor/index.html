@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Github Monitor</title>
     
-    <!-- Google Fonts: Inter (Render Dashboard Look) -->
+    <!-- Google Fonts: Google Sans (Experimental/User Requested) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Fallback to Open Sans if Google Sans is not available via public API -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -17,7 +19,7 @@
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+              sans: ['Google Sans', 'Open Sans', 'sans-serif'],
             },
             colors: {
               background: 'var(--color-background)',
@@ -40,7 +42,7 @@
         /* Light Mode Variables */
         --color-background: #f6f8fa;
         --color-surface: #ffffff;
-        --color-border: #d0d7de;
+        --color-border: rgb(107, 107, 107);
         --color-text-main: #24292f;
         --color-text-secondary: #57606a;
         --color-primary: #0969da;
@@ -48,16 +50,17 @@
 
       .dark {
         /* Dark Mode Variables - Modern Deep Dark Theme */
-        --color-background: #000000;
-        --color-surface: #09090b; /* Zinc 950 */
-        --color-border: #27272a; /* Zinc 800 */
+        --color-background: #100e0e;
+        --color-surface: #23232a; /* Zinc 950 */
+        --color-border: rgb(107, 107, 107);
         --color-text-main: #ededed;
         --color-text-secondary: #a1a1aa; /* Zinc 400 */
         --color-primary: #3b82f6; /* Blue 500 */
       }
 
       body {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Google Sans', 'Open Sans', sans-serif;
+        font-weight: 400;
         background-color: var(--color-background);
         color: var(--color-text-main);
         transition: background-color 0.3s, color 0.3s;
