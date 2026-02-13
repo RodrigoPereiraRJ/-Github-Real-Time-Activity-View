@@ -130,7 +130,7 @@ export const Login: React.FC = () => {
               </div>
             )}
 
-            <Button className="w-full font-bold bg-transparent border border-white text-txt-main hover:bg-white/10 focus:ring-0 focus:ring-offset-0 focus:outline-none" disabled={loading}>
+            <Button className="w-full font-bold bg-transparent border border-border text-txt-main hover:bg-black/5 dark:hover:bg-white/10 focus:ring-0 focus:ring-offset-0 focus:outline-none" disabled={loading}>
               {loading ? t('signing_in') : t('signin_btn')}
             </Button>
           </form>
