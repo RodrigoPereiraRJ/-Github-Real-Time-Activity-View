@@ -90,9 +90,6 @@ public class DashboardServiceImpl implements DashboardService {
         Row r4 = sheet.createRow(rowIdx++);
         createCell(r4, 0, "Generated At", dataStyle);
         createCell(r4, 1, java.time.LocalDateTime.now().format(DATE_FORMATTER), dataStyle);
-
-        sheet.autoSizeColumn(0);
-        sheet.autoSizeColumn(1);
     }
 
     private void createRepositoriesSheet(Workbook workbook, CellStyle headerStyle, CellStyle dataStyle) {
@@ -119,7 +116,6 @@ public class DashboardServiceImpl implements DashboardService {
                 createCell(row, 5, "-", dataStyle);
             }
         }
-        autoSizeColumns(sheet, headers.length);
     }
 
     private void createEventsSheet(Workbook workbook, CellStyle headerStyle, CellStyle dataStyle) {
@@ -163,7 +159,6 @@ public class DashboardServiceImpl implements DashboardService {
                 createCell(row, 5, event.getCreatedAt().format(DATE_FORMATTER), rowStyle);
             }
         };
-        autoSizeColumns(sheet, headers.length);
     }
 
     private void createAlertsSheet(Workbook workbook, CellStyle headerStyle, CellStyle dataStyle) {
@@ -206,7 +201,6 @@ public class DashboardServiceImpl implements DashboardService {
                 createCell(row, 7, alert.getCreatedAt().format(DATE_FORMATTER), rowStyle);
             }
         }
-        autoSizeColumns(sheet, headers.length);
     }
 
     // Helper Methods
@@ -287,9 +281,4 @@ public class DashboardServiceImpl implements DashboardService {
         if (style != null) cell.setCellStyle(style);
     }
 
-    private void autoSizeColumns(Sheet sheet, int count) {
-        for (int i = 0; i < count; i++) {
-            sheet.autoSizeColumn(i);
-        }
-    }
 }
