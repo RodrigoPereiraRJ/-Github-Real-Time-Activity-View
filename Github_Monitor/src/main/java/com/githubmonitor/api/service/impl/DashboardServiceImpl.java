@@ -107,9 +107,9 @@ public class DashboardServiceImpl implements DashboardService {
         int rowIdx = 1;
         for (RepositoryDTO repo : repos.getContent()) {
             Row row = sheet.createRow(rowIdx++);
-            createCell(row, 0, repo.getId().toString(), dataStyle);
-            createCell(row, 1, repo.getName(), dataStyle);
-            createCell(row, 2, repo.getOwner(), dataStyle);
+            createCell(row, 0, repo.getId() != null ? repo.getId().toString() : "", dataStyle);
+            createCell(row, 1, repo.getName() != null ? repo.getName() : "N/A", dataStyle);
+            createCell(row, 2, repo.getOwner() != null ? repo.getOwner() : "N/A", dataStyle);
             createCell(row, 3, repo.getLanguage() != null ? repo.getLanguage() : "N/A", dataStyle);
             createCell(row, 4, repo.getStatus() != null ? repo.getStatus().toString() : "UNKNOWN", dataStyle);
             
@@ -194,12 +194,12 @@ public class DashboardServiceImpl implements DashboardService {
                 }
             }
 
-            createCell(row, 0, alert.getId().toString(), rowStyle);
+            createCell(row, 0, alert.getId() != null ? alert.getId().toString() : "", rowStyle);
             createCell(row, 1, alert.getSeverity() != null ? alert.getSeverity().toString() : "", rowStyle);
-            createCell(row, 2, alert.getRuleType(), rowStyle);
+            createCell(row, 2, alert.getRuleType() != null ? alert.getRuleType() : "N/A", rowStyle);
             createCell(row, 3, alert.getAuthorLogin() != null ? alert.getAuthorLogin() : "N/A", rowStyle);
             createCell(row, 4, alert.getBranch() != null ? alert.getBranch() : "N/A", rowStyle);
-            createCell(row, 5, alert.getMessage(), rowStyle);
+            createCell(row, 5, alert.getMessage() != null ? alert.getMessage() : "", rowStyle);
             createCell(row, 6, alert.getStatus() != null ? alert.getStatus().toString() : "", rowStyle);
             
             if (alert.getCreatedAt() != null) {
