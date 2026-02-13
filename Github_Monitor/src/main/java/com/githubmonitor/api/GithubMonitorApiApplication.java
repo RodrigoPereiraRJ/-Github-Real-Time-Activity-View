@@ -6,6 +6,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class GithubMonitorApiApplication {
 
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("America/Sao_Paulo"));
+    }
+
 	public static void main(String[] args) {
         System.setProperty("java.awt.headless", "false");
         configureWindowsAppModelId();
