@@ -49,7 +49,7 @@ export const Dashboard: React.FC = () => {
             const thirtyDaysAgo = new Date();
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
             
-            const [repos, events, alerts] = await Promise.all([
+            const results = await Promise.allSettled([
                 api.repositories.list(),
                 api.events.list({ 
                     start: thirtyDaysAgo.toISOString(), 
@@ -57,6 +57,14 @@ export const Dashboard: React.FC = () => {
                 }),
                 api.alerts.list()
             ]);
+
+            const repos = results[0].status === 'fulfilled' ? results[0].value : [];
+            const events = results[1].status === 'fulfilled' ? results[1].value : [];
+            const alerts = results[2].status === 'fulfilled' ? results[2].value : [];
+
+            if (results[0].status === 'rejected') console.error("Failed to fetch repos", results[0].reason);
+            if (results[1].status === 'rejected') console.error("Failed to fetch events", results[1].reason);
+            if (results[2].status === 'rejected') console.error("Failed to fetch alerts", results[2].reason);
 
             setAllEvents(events);
 

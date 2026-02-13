@@ -25,10 +25,30 @@ const handleResponse = async (response: Response) => {
 
 // --- API METHODS ---
 
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = 30000) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, {
+      cache: 'no-store',
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error: any) {
+    clearTimeout(id);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out');
+    }
+    throw error;
+  }
+};
+
 export const api = {
   auth: {
     login: async (email: string, password: string): Promise<AuthResponse> => {
-      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      const res = await fetchWithTimeout(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -45,38 +65,30 @@ export const api = {
       };
     },
     register: async (data: any): Promise<AuthResponse> => {
-        // SIMULATION: Allow registration for UI testing purposes
-        /*
-        const res = await fetch(`${API_BASE_URL}/auth/register`, {
+        // 1. Register the user
+        const res = await fetchWithTimeout(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
         });
-        return handleResponse(res);
-        */
-       
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({
-                    token: 'test-jwt-token-bypass',
-                    type: 'Bearer',
-                    id: 'test-user-123',
-                    username: data.name || 'User',
-                    email: data.email,
-                });
-            }, 800);
-        });
+
+        if (!res.ok) {
+            throw new Error(`Registration failed: ${res.statusText}`);
+        }
+
+        // 2. Automatically login to get the token (since backend register only returns string)
+        return api.auth.login(data.email, data.password);
     }
   },
   repositories: {
     list: async (): Promise<Repository[]> => {
-      const res = await fetch(`${API_BASE_URL}/repositories?size=100`, { headers: getHeaders() });
+      const res = await fetchWithTimeout(`${API_BASE_URL}/repositories?size=100`, { headers: getHeaders() });
       const data = await handleResponse(res);
       // Backend returns Page object
       return data.content || [];
     },
     create: async (repo: Partial<Repository>) => {
-      const res = await fetch(`${API_BASE_URL}/repositories`, {
+      const res = await fetchWithTimeout(`${API_BASE_URL}/repositories`, {
           method: 'POST',
           headers: getHeaders(),
           body: JSON.stringify(repo)
@@ -84,7 +96,7 @@ export const api = {
       return handleResponse(res);
     },
     delete: async (id: string) => {
-        const res = await fetch(`${API_BASE_URL}/repositories/${id}`, {
+        const res = await fetchWithTimeout(`${API_BASE_URL}/repositories/${id}`, {
             method: 'DELETE',
             headers: getHeaders()
         });
@@ -92,20 +104,20 @@ export const api = {
         return handleResponse(res);
     },
     getMetrics: async (id: string): Promise<Metrics> => {
-        const res = await fetch(`${API_BASE_URL}/repositories/${id}/metrics`, { headers: getHeaders() });
+        const res = await fetchWithTimeout(`${API_BASE_URL}/repositories/${id}/metrics`, { headers: getHeaders() });
         return handleResponse(res);
     }
   },
   events: {
     list: async (filters?: Record<string, string>): Promise<Event[]> => {
       const query = new URLSearchParams(filters).toString();
-      const res = await fetch(`${API_BASE_URL}/events?${query}`, { headers: getHeaders() });
+      const res = await fetchWithTimeout(`${API_BASE_URL}/events?${query}`, { headers: getHeaders() });
       const data = await handleResponse(res);
       // Backend returns Page object
       return data.content || [];
     },
     getDiff: async (eventId: string): Promise<any[]> => {
-        const res = await fetch(`${API_BASE_URL}/events/${eventId}/diff`, { headers: getHeaders() });
+        const res = await fetchWithTimeout(`${API_BASE_URL}/events/${eventId}/diff`, { headers: getHeaders() });
         return handleResponse(res);
     }
   },
