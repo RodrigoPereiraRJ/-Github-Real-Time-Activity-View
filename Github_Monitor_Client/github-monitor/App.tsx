@@ -13,6 +13,7 @@ import { Settings } from './pages/Settings';
 import { Alerts } from './pages/Alerts';
 import { Contributors } from './pages/Contributors';
 import { Export } from './pages/Export';
+import { Connect } from './pages/Connect';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -67,6 +68,12 @@ const AppRoutes = () => {
           <Route path="/export" element={
             <ProtectedRoute>
               <Export />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/connect" element={
+            <ProtectedRoute>
+              <Connect />
             </ProtectedRoute>
           } />
           

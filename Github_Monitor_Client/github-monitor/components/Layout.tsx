@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FolderGit2, Activity, AlertTriangle, Users, Settings, LogOut, Bell, Menu, X, Search, Plus, Camera, FileSpreadsheet } from 'lucide-react';
+import { LayoutDashboard, FolderGit2, Activity, AlertTriangle, Users, Settings, LogOut, Bell, Menu, X, Search, Plus, Camera, FileSpreadsheet, Plug } from 'lucide-react';
 import { useAuth } from '../services/authContext';
 import { useLanguage } from '../services/languageContext';
 import { Button, Input } from './ui'; 
@@ -205,6 +205,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const settingsNavItems = [
     { label: t('contributors'), path: '/contributors', icon: Users },
     { label: t('export'), path: '/export', icon: FileSpreadsheet },
+    { label: 'Connect', path: '/connect', icon: Plug },
     { label: t('settings'), path: '/settings', icon: Settings },
   ];
 
