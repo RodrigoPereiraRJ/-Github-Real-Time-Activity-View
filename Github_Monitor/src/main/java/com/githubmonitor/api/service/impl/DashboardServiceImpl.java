@@ -153,11 +153,11 @@ public class DashboardServiceImpl implements DashboardService {
                 }
             }
 
-            createCell(row, 0, event.getId().toString(), rowStyle);
-            createCell(row, 1, event.getType().toString(), rowStyle);
+            createCell(row, 0, event.getId() != null ? event.getId().toString() : "", rowStyle);
+            createCell(row, 1, event.getType() != null ? event.getType().toString() : "UNKNOWN", rowStyle);
             createCell(row, 2, event.getActor() != null ? event.getActor() : "N/A", rowStyle);
             createCell(row, 3, event.getBranch() != null ? event.getBranch() : "N/A", rowStyle);
-            createCell(row, 4, event.getRepositoryId().toString(), rowStyle);
+            createCell(row, 4, event.getRepositoryId() != null ? event.getRepositoryId().toString() : "", rowStyle);
             
             if (event.getCreatedAt() != null) {
                 createCell(row, 5, event.getCreatedAt().format(DATE_FORMATTER), rowStyle);
